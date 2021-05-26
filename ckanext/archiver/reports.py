@@ -4,7 +4,6 @@ try:
 except ImportError:
     from sqlalchemy.util import OrderedDict
 
-from ckan.common import _
 import ckan.model as model
 import ckan.plugins as p
 
