@@ -1,13 +1,18 @@
 import copy
-try:
-    from collections import OrderedDict  # from python 2.7
-except ImportError:
-    from sqlalchemy.util import OrderedDict
+import logging
 
 import ckan.model as model
 import ckan.plugins as p
 
 from ckanext.report import lib
+
+try:
+    from collections import OrderedDict  # from python 2.7
+except ImportError:
+    from sqlalchemy.util import OrderedDict
+
+
+log = logging.getLogger(__name__)
 
 
 def broken_links(organization, include_sub_organizations=False):
@@ -87,6 +92,8 @@ def broken_links_index(include_sub_organizations=False):
     num_packages = 0
     num_resources = 0
     for org_name, org_counts in results.iteritems():
+        if org_counts['broken_resources'] == 0:  # Do not append entries without broken links.
+            continue
         data.append(OrderedDict((
             ('organization_title', results[org_name]['organization_title']),
             ('organization_name', org_name),
