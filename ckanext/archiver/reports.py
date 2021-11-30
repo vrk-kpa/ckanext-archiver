@@ -91,7 +91,7 @@ def broken_links_index(include_sub_organizations=False):
     num_broken_resources = 0
     num_packages = 0
     num_resources = 0
-    for org_name, org_counts in results.iteritems():
+    for org_name, org_counts in results.items():
         if org_counts['broken_resources'] == 0:  # Do not append entries without broken links.
             continue
         data.append(OrderedDict((
