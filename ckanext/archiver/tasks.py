@@ -333,17 +333,20 @@ def _update_resource(resource_id, queue, log):
         download_status_id = Status.by_text('Download error')
         try_as_api = True
         err = e
-    except ChooseNotToDownload:
+    except ChooseNotToDownload as e:
         download_status_id = Status.by_text('Chose not to download')
         try_as_api = False
-    except ForbiddenError:
+        err = e
+    except ForbiddenError as e:
         download_status_id = Status.by_text('Forbidden error')
         try_as_api = False
+        err = e
     except Exception as e:
         if os.environ.get('DEBUG'):
             raise
         log.error('Uncaught download failure: %r, %r', e, e.args)
-        err = e
+        _save(Status.by_text('Download failure'), e, resource)
+        return
 
     if not Status.is_ok(download_status_id) and err:
         log.info('GET error: %s - %r, %r "%s"',
