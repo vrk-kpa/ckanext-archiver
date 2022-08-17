@@ -61,3 +61,7 @@ def size_report():
 @archiver.command()
 def delete_files_larger_than_max_content_length():
     utils.delete_files_larger_than_max_content_length()
+
+@archiver.command()
+def send_broken_link_notification_email():
+    utils.send_broken_link_notification_email()

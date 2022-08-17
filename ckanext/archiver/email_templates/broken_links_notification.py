@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from pylons import config
+from ckan.plugins.toolkit import config
 
 """
     A template file for resource broken link notification emails.

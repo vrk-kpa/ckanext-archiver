@@ -17,6 +17,15 @@ except ImportError:
     from sqlalchemy.util import OrderedDict
 
 
+from datetime import datetime, timedelta
+try:
+    from ckan.common import asbool  # CKAN 2.9
+except ImportError:
+    from paste.deploy.converters import asbool
+from ckan.lib.mailer import mail_recipient, MailerException
+from .email_templates import broken_links_notification as email_template
+
+
 log = logging.getLogger(__name__)
 
 
@@ -519,3 +528,66 @@ def delete_files_larger_than_max_content_length():
             model.Session.commit()
             model.Session.flush()
             print('..deleted %s' % filepath.decode('utf8'))
+
+
+
+def send_broken_link_notification_email():
+    send_notification_emails_to_maintainers = asbool(
+        config.get('ckanext-archiver.send_notification_emails_to_maintainers', False))
+    if send_notification_emails_to_maintainers:
+        from ckan import model
+        from ckanext.archiver.model import Archival, Status
+
+        # send email to datasets which have had broken links for more than 5 days
+        todayMinus5 = datetime.now() - timedelta(days=5)
+
+        resources_with_broken = (model.Session.query(Archival, model.Package, model.Resource)
+            .filter(Archival.is_broken == True) # noqa
+            .filter(Archival.first_failure < todayMinus5)
+            .join(model.Package, Archival.package_id == model.Package.id)
+            .filter(model.Package.state == 'active')
+            .join(model.Resource, Archival.resource_id == model.Resource.id)
+            .filter(model.Resource.state == 'active'))
+
+        grouped_by_maintainer = {}
+        # Group resources together by maintainer
+        # So we can send only one message to the maintainer containing all their broken resources
+        for resource in resources_with_broken.all():
+            if Status.is_status_broken(resource[0].status_id):
+                maintainer = resource[1].maintainer
+
+                if maintainer not in grouped_by_maintainer:
+                    grouped_by_maintainer[maintainer] = {"email": resource[1].maintainer_email, "broken": []}
+
+                grouped_by_maintainer[maintainer]['broken'].append({
+                    "package_id": resource[0].package_id,
+                    "package_title": resource[1].title,
+                    "resource_id": resource[0].resource_id,
+                    "status_id": resource[0].status_id,
+                    "first_failure": resource[0].first_failure,
+                    "failure_count": resource[0].failure_count,
+                    "broken_url": resource[2].url,
+                })
+
+        exempt_email_domains = config.get('ckanext-archiver.exempt_domains_from_broken_link_notifications', [])
+        # Create email to each maintainer and send them
+        for maintainer_name, maintainer_details in grouped_by_maintainer.items():
+
+            if maintainer_details.get('email'):
+                maintainer_domain = maintainer_details['email'].split('@')[1]
+                if maintainer_domain in exempt_email_domains:
+                    log.info('Maintainer in exempt domains, not sending email..')
+                    continue
+
+            log.info('Sending broken link notification to %s' % maintainer_details["email"])
+            subject = email_template.subject.format(amount=len(maintainer_details["broken"]))
+            body = email_template.message(maintainer_details["broken"])
+            try:
+                mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
+            except MailerException as e:
+                log.warn('Error sending broken link notification to "%s": %s'
+                                % (maintainer_details["email"], e))
+
+        log.info('All broken link notifications sent')
+    else:
+        log.info("Notification to maintainers are disabled, no notifications sent.")
