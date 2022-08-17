@@ -530,7 +530,6 @@ def delete_files_larger_than_max_content_length():
             print('..deleted %s' % filepath.decode('utf8'))
 
 
-
 def send_broken_link_notification_email():
     send_notification_emails_to_maintainers = asbool(
         config.get('ckanext-archiver.send_notification_emails_to_maintainers', False))
@@ -586,7 +585,7 @@ def send_broken_link_notification_email():
                 mail_recipient(maintainer_name, maintainer_details["email"], subject, body)
             except MailerException as e:
                 log.warn('Error sending broken link notification to "%s": %s'
-                                % (maintainer_details["email"], e))
+                         % (maintainer_details["email"], e))
 
         log.info('All broken link notifications sent')
     else:
