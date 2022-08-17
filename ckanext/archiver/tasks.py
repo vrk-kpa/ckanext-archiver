@@ -11,7 +11,7 @@ import datetime
 import copy
 import mimetypes
 import re
-import time
+from time import sleep
 
 from requests.packages import urllib3
 from future.moves.urllib.parse import urlparse, urljoin, quote, urlunparse
@@ -118,7 +118,7 @@ def update_resource(resource_id, queue='bulk'):
     log.info('Starting update_resource task: res_id=%r queue=%s', resource_id, queue)
 
     # HACK because of race condition #1481
-    time.sleep(2)
+    sleep(2)
 
     # Do all work in a sub-routine since it can then be tested without celery.
     # Also put try/except around it is easier to monitor ckan's log rather than
@@ -440,10 +440,13 @@ def download(context, resource, url_timeout=30,
     # start the download - just get the headers
     # May raise DownloadException
     method_func = {'GET': requests.get, 'POST': requests.post}[method]
-    res = requests_wrapper(log, method_func, url, timeout=url_timeout,
-                           stream=True, headers=headers,
-                           verify=verify_https(),
-                           )
+    kwargs = {'timeout': url_timeout, 'stream': True, 'headers': headers,
+              'verify': verify_https()}
+    if 'ckan.download_proxy' in config:
+        download_proxy = config.get('ckan.download_proxy')
+        log.debug('Downloading via proxy %s', download_proxy)
+        kwargs['proxies'] = {'http': download_proxy, 'https': download_proxy}
+    res = requests_wrapper(log, method_func, url, **kwargs)
     url_redirected_to = res.url if url != res.url else None
 
     if context.get('previous') and ('etag' in res.headers):
