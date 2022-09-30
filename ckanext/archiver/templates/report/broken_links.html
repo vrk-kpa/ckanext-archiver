@@ -19,7 +19,7 @@
    <tbody>
     {% for row in c.data['table'] %}
       <tr>
-        <td>{{ h.link_to(row['organization_title'], h.report__relative_url_for(organization=row['organization_name'])) }}</td>
+        <td>{{ h.link_to(row['organization_title'], h.report__get_organization_url(organization=row['organization_name'])) }}</td>
         <td>{{ row['broken_package_count'] }}</td>
         <td>{{ row['broken_resource_count'] }}</td>
         <td>{{ row.get('broken_resource_percent') }}%</td>
@@ -54,7 +54,7 @@
    <tbody>
       {% for row_dict in c.data['table'] %}
         <tr>
-          <td><a href="{{ h.url_for(controller='package', action='read', id=row_dict['dataset_name']) }}">{{ row_dict['dataset_title'] }}</a></td>
+          <td><a href="/dataset/{{ row_dict['dataset_name'] }}">{{ row_dict['dataset_title'] }}</a></td>
           {% if c.options['include_sub_organizations'] %}
             <td><a href="/publisher/{{ row_dict['organization_name'] }}">{{ row_dict['organization_title'] }}</a></td>
           {% endif %}
