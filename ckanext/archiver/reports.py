@@ -64,8 +64,8 @@ def broken_links_index(include_sub_organizations=False):
             'resources': num_resources
         }
 
-    counts_with_sub_orgs = copy.deepcopy(counts)  # new dict
     if include_sub_organizations:
+        counts_with_sub_orgs = copy.deepcopy(counts)  # new dict
         for org_name in add_progress_bar(counts_with_sub_orgs, 'Part 2/2'):
             org = model.Group.by_name(org_name)
 
