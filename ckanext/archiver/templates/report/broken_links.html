@@ -1,4 +1,4 @@
-{% if c.options['organization'] == None %}
+{% if options['organization'] == None %}
   <ul>
       <li>{% trans %}Broken datasets{% endtrans %}: {{ c.data['num_broken_packages'] }} / {{ c.data['num_packages'] }} ({{ c.data.get('broken_package_percent') }}%)</li>
       <li>{% trans %}Broken links{% endtrans %}: {{ c.data['num_broken_resources'] }} / {{ c.data['num_resources'] }} ({{ c.data.get('broken_resource_percent') }}%)</li>
@@ -19,7 +19,7 @@
    <tbody>
     {% for row in c.data['table'] %}
       <tr>
-        <td>{{ h.link_to(row['organization_title'], h.report__get_organization_url(organization=row['organization_name'])) }}</td>
+        <td>{{ h.nav_link(row.get('organization_title'), named_route='report.view', report_name=report_name, organization=row.get('organization_name')) }}</td>
         <td>{{ row['broken_package_count'] }}</td>
         <td>{{ row['broken_resource_count'] }}</td>
         <td>{{ row.get('broken_resource_percent') }}%</td>
