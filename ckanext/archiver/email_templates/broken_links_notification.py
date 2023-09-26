@@ -24,29 +24,29 @@ def message(itemList):
     return messageTemplate.format(amount=len(itemList), items=separator.join(items))
 
 
-subject = u"{amount} broken link(s) in your dataset(s) in Avoindata.fi - Yksi tai useampi rikkinäinen linkki tietoaineistoissasi Avoindata.fi-palvelussa" # noqa
+subject = u"{amount} broken link(s) in your dataset(s) in Suomi.fi Open Data - Yksi tai useampi rikkinäinen linkki tietoaineistoissasi Suomi.fi-avoindatassa" # noqa
 
 
 messageTemplate = u"""
 Hei,
  
-Ylläpidät tietoaineistoja Avoindata.fi-palvelussa. Aineistoissasi on tällä hetkellä (1) tai useampi rikkinäinen linkki,
+Ylläpidät tietoaineistoja Suomi.fi-avoindatassa. Aineistoissasi on tällä hetkellä (1) tai useampi rikkinäinen linkki,
 jotka on listattu alla. Voit päivittää linkit kirjautumalla palveluun, valitsemalla korjattavan datasetin ja päivittämällä linkin.
 Jos sinulla on kysyttävää, opastamme sinua tarpeen vaatiessa osoitteessa avoindata@dvv.fi.
  
 Ystävällisin terveisin,
-Avoindata.fi tuki
+Suomi.fi-avoindatan tuki
 ___
 
 Hello,
  
-You have uploaded a dataset or datasets in Avoindata.fi. You have {amount} broken link(s) in your datasets.
+You have uploaded a dataset or datasets in Suomi.fi Open Data. You have {amount} broken link(s) in your datasets.
 You can update the link(s) by logging in, navigating to the broken resource.
  
 Should you have any questions or need help, please get in touch with us at avoindata@dvv.fi.
  
 Best regards,
-Avoindata.fi support
+Suomi.fi Open Data support
 
 ___
 
