@@ -314,8 +314,9 @@ def _update_resource(resource_id, queue, log):
         }
 
     err = None
+    url_timeout = int(config.get('ckanext-archiver.resource_download_timeout', '30'))
     try:
-        download_result = download(context, resource)
+        download_result = download(context, resource, url_timeout=url_timeout)
     except NotChanged as e:
         download_status_id = Status.by_text('Content has not changed')
         try_as_api = False
