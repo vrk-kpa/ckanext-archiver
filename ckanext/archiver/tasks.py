@@ -314,8 +314,9 @@ def _update_resource(resource_id, queue, log):
         }
 
     err = None
+    url_timeout = int(config.get('ckanext-archiver.resource_download_timeout', '30'))
     try:
-        download_result = download(context, resource)
+        download_result = download(context, resource, url_timeout=url_timeout)
     except NotChanged as e:
         download_status_id = Status.by_text('Content has not changed')
         try_as_api = False
@@ -838,6 +839,8 @@ def requests_wrapper(log, func, *args, **kwargs):
 
 
 def ogc_request(context, resource, service, wms_version):
+    from ckan.plugins.toolkit import config
+
     original_url = url = resource['url']
     # Remove parameters
     url = url.split('?')[0]
@@ -846,7 +849,8 @@ def ogc_request(context, resource, service, wms_version):
            (service, wms_version)
     resource['url'] = url
     # Make the request
-    response = download(context, resource)
+    url_timeout = int(config.get('ckanext-archiver.resource_download_timeout', '30'))
+    response = download(context, resource, url_timeout=url_timeout)
     # Restore the URL so that it doesn't get saved in the actual resource
     resource['url'] = original_url
     return response
